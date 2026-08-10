@@ -168,9 +168,9 @@ export default function AskQuestionPage() {
             <Label>Description <span className="text-destructive">*</span></Label>
             <div className="min-h-[300px] border rounded-md">
               <RichTextEditor 
-                content={description} 
+                value={description} 
                 onChange={setDescription} 
-                placeholder="Describe your problem in detail... You can paste images, format code, and structure your text." 
+                placeholder="Provide all the details someone would need to answer your question..." 
               />
             </div>
           </div>

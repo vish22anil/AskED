@@ -11,6 +11,9 @@ interface User {
   profileImage?: string;
   department?: string;
   year?: number;
+  reputation?: number;
+  badges?: Array<{ id: string; name: string; description: string; iconUrl: string }>;
+  bio?: string;
 }
 
 interface AuthContextType {

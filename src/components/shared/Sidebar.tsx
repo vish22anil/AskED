@@ -24,7 +24,7 @@ export default function Sidebar() {
       { name: "Settings", href: "/app/settings", icon: Settings },
     ];
 
-    if (user?.role === "student") {
+    if (user?.role === "STUDENT") {
       return [
         { name: "Dashboard", href: "/dashboard/student", icon: LayoutDashboard },
         { name: "My Questions", href: "/app/questions", icon: MessageSquare },
@@ -33,7 +33,7 @@ export default function Sidebar() {
       ];
     }
     
-    if (user?.role === "teacher") {
+    if (user?.role === "TEACHER") {
       return [
         { name: "Dashboard", href: "/dashboard/teacher", icon: LayoutDashboard },
         { name: "Answer Questions", href: "/app/answer", icon: MessageSquare },
@@ -42,7 +42,7 @@ export default function Sidebar() {
       ];
     }
     
-    if (user?.role === "admin") {
+    if (user?.role === "ADMIN") {
       return [
         { name: "Dashboard", href: "/dashboard/admin", icon: LayoutDashboard },
         { name: "Users", href: "/app/users", icon: Users },

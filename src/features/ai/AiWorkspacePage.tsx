@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, BrainCircuit, Loader2, Camera, Upload, Image as ImageIcon } from "lucide-react";
+import { Send, Bot, User, BrainCircuit, Loader2, Camera, Upload, Image as ImageIcon, X } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';

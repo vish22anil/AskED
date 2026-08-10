@@ -96,7 +96,7 @@ export default function Signup() {
   });
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval>;
     if (step === 3 && cooldown > 0) {
       timer = setInterval(() => setCooldown((c) => c - 1), 1000);
     } else if (step === 3 && cooldown === 0) {

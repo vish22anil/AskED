@@ -50,7 +50,7 @@ export default function ForgotPassword() {
   });
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval>;
     if (step === 2 && cooldown > 0) {
       timer = setInterval(() => setCooldown((c) => c - 1), 1000);
     } else if (cooldown === 0) {
