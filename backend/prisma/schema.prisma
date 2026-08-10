@@ -1,0 +1,292 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum QuestionStatus {
+  OPEN
+  RESOLVED
+  CLOSED
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model User {
+  id              String   @id @default(uuid())
+  fullName        String
+  email           String   @unique
+  passwordHash    String
+  role            Role
+  reputation      Int      @default(0)
+
+  department      String?
+  university      String?
+  year            Int?
+  rollNumber      String?  @unique
+  employeeId      String?  @unique
+
+  bio             String?
+  profileImage    String   @default("")
+
+  emailVerified   Boolean  @default(false)
+  emailVerifiedAt DateTime?
+  isActive        Boolean  @default(true)
+  isDisabled      Boolean  @default(false)
+  isApproved      Boolean  @default(false) // For teachers, requires admin approval
+  theme           String   @default("light")
+  emailNotifs     Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subjects         TeacherSubject[]
+  questions        Question[]
+  answers          Answer[]
+  comments         Comment[]
+  bookmarks        Bookmark[]
+  votes            Vote[]
+  activities       Activity[]
+  attachments      Attachment[]
+  userBadges       UserBadge[]
+  notifications    Notification[]
+  aiConversations  AiConversation[]
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  semester    Int
+
+  teachers    TeacherSubject[]
+  questions   Question[]
+}
+
+model TeacherSubject {
+  teacherId   String
+  subjectId   String
+
+  teacher      User    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject      Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@id([teacherId, subjectId])
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+
+  studentId     String
+  subjectId      String
+
+  status        QuestionStatus @default(OPEN)
+  difficulty    Difficulty?
+  isDraft       Boolean        @default(false)
+  views         Int            @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  student        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject        Subject  @relation(fields: [subjectId], references: [id])
+
+  answers        Answer[]
+  comments       Comment[]
+  bookmarks      Bookmark[]
+  votes          Vote[]
+  tags           QuestionTag[]
+  attachments    Attachment[]
+}
+
+model Answer {
+  id            String   @id @default(uuid())
+  content       String
+
+  teacherId      String
+  questionId     String
+
+  isAccepted     Boolean   @default(false)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  teacher        User      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  question       Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  comments       Comment[]
+  votes          Vote[]
+  attachments    Attachment[]
+}
+
+model Comment {
+  id          String    @id @default(uuid())
+  content     String
+
+  userId      String
+  questionId  String?
+  answerId    String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answer      Answer?   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+}
+
+model Bookmark {
+  id          String    @id @default(uuid())
+  userId      String
+  questionId  String
+
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+}
+
+model Vote {
+  id          String    @id @default(uuid())
+  userId      String
+  questionId  String?
+  answerId    String?
+  isUpvote    Boolean
+
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answer      Answer?   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  // A user can only vote once per question or answer
+  @@unique([userId, questionId])
+  @@unique([userId, answerId])
+}
+
+model Tag {
+  id          String        @id @default(uuid())
+  name        String        @unique
+  questions   QuestionTag[]
+}
+
+model QuestionTag {
+  questionId  String
+  tagId       String
+
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag         Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, tagId])
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String   // e.g., "ASKED_QUESTION", "ANSWERED_QUESTION", "UPVOTED"
+  metadata    Json?    // Store related IDs (e.g., questionId, answerId) or names
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Otp {
+  id         String   @id @default(uuid())
+  email      String
+  otpHash    String
+  type       String   // e.g., "REGISTRATION", "FORGOT_PASSWORD"
+  data       Json?    // Temporary storage for registration data
+  attempts   Int      @default(0)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([email])
+}
+
+model Attachment {
+  id          String   @id @default(uuid())
+  url         String
+  filename    String
+  fileType    String
+  size        Int
+
+  uploaderId  String
+  questionId  String?
+  answerId    String?
+  messageId   String? // For future chat
+
+  createdAt   DateTime @default(now())
+
+  uploader    User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  question    Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answer      Answer?   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  iconUrl     String
+
+  users       UserBadge[]
+}
+
+model UserBadge {
+  userId      String
+  badgeId     String
+  awardedAt   DateTime @default(now())
+
+  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge       Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, badgeId])
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String
+  message     String
+  isRead      Boolean  @default(false)
+  link        String?
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AiConversation {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    AiMessage[]
+}
+
+model AiMessage {
+  id             String   @id @default(uuid())
+  conversationId String
+  role           String   // 'user' | 'assistant' | 'system'
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
