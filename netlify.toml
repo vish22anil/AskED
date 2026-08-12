@@ -3,13 +3,13 @@
   publish = "dist"
 
 [functions]
-  directory = "backend/api"
-  external_node_modules = ["express"]
+  directory = "netlify/functions"
   node_bundler = "esbuild"
+  external_node_modules = ["express", "@prisma/client"]
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/index/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
 
 [[redirects]]
