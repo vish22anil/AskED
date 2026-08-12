@@ -38,6 +38,7 @@
     "nodemailer": "^9.0.3",
     "pg": "^8.22.0",
     "resend": "^6.18.1",
+    "serverless-http": "^4.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
