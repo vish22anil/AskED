@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt';
 
 const PORT = process.env.PORT || 3000;
 
-const ensureGuestUser = async () => {
+export const ensureGuestUser = async () => {
   try {
     const guestEmail = 'guest@asked.local';
     let guestUser = await prisma.user.findUnique({ where: { email: guestEmail } });
@@ -36,7 +36,9 @@ const ensureGuestUser = async () => {
   }
 };
 
-app.listen(PORT, async () => {
-  console.log(`Server is running on port ${PORT}`);
-  await ensureGuestUser();
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, async () => {
+    console.log(`Server is running on port ${PORT}`);
+    await ensureGuestUser();
+  });
+}

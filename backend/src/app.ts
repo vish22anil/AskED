@@ -42,6 +42,11 @@ app.use(cors({
       return callback(null, true);
     }
     
+    // Allow production frontend URL from environment variable
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
+    
     // For production, you'd check against a specific list of domains
     return callback(new Error('Not allowed by CORS'), false);
   },
